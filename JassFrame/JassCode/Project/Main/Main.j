@@ -296,6 +296,7 @@ library JassForgeFeatureDemo {
         interpreter.("脚手架Demo/解释块").InterpreterHello();
     }
 
+    // 配套插件VSCode插件市场搜:JassForge
     function onInit() {
         BJDebugMsg("===== JassForge 编译器特性 Demo =====");
 
