@@ -194,6 +194,7 @@ endlibrary
 - vJASS 模式下，顶层函数/结构体/类型别名/枚举/方法默认是 `public`
 - Zinc 模式下，顶层函数/结构体/类型别名/枚举/方法默认是 `private`
 - 结构体字段在两种模式下默认都是 `public`
+- `interface` 声明本身不能写 `public/private/protected/static` 修饰符；接口方法隐式为 `public`
 
 例子：
 
@@ -498,7 +499,8 @@ struct Hero {
 - `constant`
 - `static`
 - `stub`
-- `implements` 语法解析
+- `module` / `implement` mixin 子集
+- `interface` / `implements` 契约检查与运行时 interface 值
 
 示例：
 
@@ -514,9 +516,16 @@ struct Box<T> extends Base implements IReadable {
 
 注意：
 
-- `implements` 目前已被解析并存入 AST
-- 但完整的 `interface/module` 体系没有看到完整的语义与代码生成链路
-- 因此不要把它当成“已成熟的接口系统”
+- `module` / `implement` 当前作为编译期 mixin 展开到 struct
+- `module` 支持成员字段和 method，不支持 initializer/onInit、嵌套 module 或独立私有命名空间
+- `interface` / `implements` 同时提供编译期契约和运行时 interface 值。
+- interface 声明本身不能写 `public/private/protected/static` 修饰符；interface 方法隐式为 `public`，不能写 `private/protected/static`。
+- `struct implements I` 必须提供接口声明的所有 public instance method，且签名必须完全一致。
+- interface 可作为 local/global/member/param/return 类型，也支持数组；生成到 JASS 时底层存储为 `integer`。
+- 实现了接口的 struct 可以隐式赋给该 interface；`null` 和同 interface 之间赋值允许。
+- interface 值只能调用接口声明的方法；字段访问、`new Interface`、`Interface.create()`、`delete interfaceValue`、interface 转 struct、无关 interface 互转都会报错。
+- interface 声明本身不输出普通 JASS 方法；运行时 interface 调用会生成内部 dispatch helper。
+- module 展开后的 method、父 struct 继承来的 public method 都可以满足 interface。
 
 ### 7.3 字段规则
 
@@ -1458,7 +1467,7 @@ return _G("PlayerData")[0]
 
 当前未确认/不要依赖：
 
-- `#include` 当前没有看到完整实现链路，不建议写进项目规范里当作已支持能力
+- `#include` 明确不支持；需要多文件编译时，请通过编译命令/项目文件列表传入多个 `.j` 文件
 
 ## 19. 编译器注解
 
@@ -1514,7 +1523,29 @@ JassForge 支持一批以 `//@` 开头的源级注解。
 - 不是所有变量形式都可用
 - 数组、某些常量场景会被拒绝
 
-### 19.5 其他已确认注解
+### 19.5 `//@ priority`
+
+用途：
+
+- 为 `library` / `scope` 的启动阶段设置初始化优先级
+- 影响显式 `initializer` / 多 `initializer`，以及 `onInit` fallback
+
+语法：
+
+```jass
+//@ priority 100
+//@ priority -5 2
+```
+
+规则：
+
+- 第一位数字是优先级，必填，数值越大越早执行
+- 第二位数字仍表示“向下影响的声明行数”，可省略，默认 `1`
+- 该注解应写在 `library` / `scope` 声明上方，而不是写在 `onInit` / `initializer` 函数上方
+- `requires/needs/uses` 仍是硬约束；priority 只会在当前可执行的一批库/作用域中重排顺序
+- 同一 `library` 内多个 `initializer` 仍按声明列表顺序执行
+
+### 19.6 其他已确认注解
 
 - `//@ print-log`
 - `//@ print-log-all`
@@ -1604,14 +1635,10 @@ TaskInfo Tasks[4] = new TaskInfo(seed)[4];
 
 以下内容不要当成“已经完整可用”：
 
-- `interface`
-- `module`
-- `delegate`
-- `super`
-- 完整的 `implements` 接口系统
-- `#include`
+- interface runtime cast
+- `#include`（不支持；请通过编译命令/项目文件列表传入多个 `.j` 文件）
 
-这些词法/语法入口有的已经保留，有的已部分入 AST，但目前没有看到完整、稳定、成体系的语义和代码生成闭环。
+这些能力目前没有完整、稳定、成体系的语义和代码生成闭环。
 
 ## 22. 推荐写法
 

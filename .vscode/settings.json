@@ -1,6 +1,5 @@
 {
     "files.encoding": "utf8",
-    "html.validate.enable": false,
     "zinc-helper.indexing.excludePathPatterns": [
         "legacy/**",
         "test/**",

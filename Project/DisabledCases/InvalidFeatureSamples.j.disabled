@@ -1,0 +1,78 @@
+//! zinc
+
+// 本文件记录语言限制的反面写法，默认不参与编译。
+// 如需复查某一条限制，请只拿对应片段到临时目录单独编译。
+
+library JFDemoInvalidSamples {
+
+    enum InvalidMode: integer {
+        InvalidIdle = 0,
+        InvalidBoss = 1
+    }
+
+    struct InvalidStats {
+        readonly integer rawId = 'Hpal';
+        integer values[2];
+    }
+
+    interface IInvalidCase {
+        method Run() -> integer;
+    }
+
+    function RefTarget(integer &value) {
+        value += 1;
+    }
+
+    function RunInvalidCases() {
+        integer x = 1;
+        integer y = 2;
+        InvalidStats stats = InvalidStats.create();
+        sys::stack<integer> stackValues = sys::stack<integer>.create();
+        IInvalidCase iface = null;
+
+        // 枚举必须写限定名，不能裸写成员名。
+        InvalidMode modeA = InvalidBoss;
+
+        // 不能把底层integer直接隐式赋给强类型枚举。
+        InvalidMode modeB = 1;
+
+        // 引用参数只支持简单变量名，不能传字段、数组项或表达式。
+        RefTarget(stats.values[0]);
+        RefTarget(x + y);
+
+        // 同一次调用里不能把两个&形参绑定到同一个变量。
+        // SwapRef(x, x);
+
+        // let零参形式不能写括号。
+        let InvalidStats badLet();
+
+        // let对象不允许显式delete。
+        let InvalidStats autoStats;
+        delete autoStats;
+
+        // readonly字段不能赋值，也不能通过反射写入。
+        stats.rawId = 'Hfoo';
+        stats.at("rawId") = 'Hfoo';
+
+        // 全局或结构体数组长度必须是整数字面量，不能用符号。
+        // string names[MAX_PLAYER_SLOTS];
+
+        // sys::stack/sys::queue当前不支持range-for。
+        for (integer value : stackValues) {
+            x += value;
+        }
+
+        // interface值不能new、delete、转回struct或访问字段。
+        iface = new IInvalidCase();
+        delete iface;
+        x = iface.someField;
+
+        // #include 当前不支持，多文件请通过编译命令传入。
+        // #include "OtherFile.j"
+
+        stackValues.destroy();
+        stats.destroy();
+    }
+}
+
+//! endzinc

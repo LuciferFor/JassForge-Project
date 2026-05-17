@@ -388,7 +388,7 @@ endfunction
 
 function GetFps takes nothing returns real
     call GetTriggeringTrigger()
-    return 0
+    return 0.0
 endfunction
 
 // 设置单位大头像模型
@@ -664,7 +664,7 @@ endfunction
 //返回值：装饰物的x坐标
 function GetDoodadX takes integer index returns real
     call GetTriggeringTrigger()
-    return 0
+    return 0.0
 endfunction
 
 //获取装饰物的y坐标
@@ -672,7 +672,7 @@ endfunction
 //返回值：装饰物的y坐标
 function GetDoodadY takes integer index returns real
     call GetTriggeringTrigger()
-    return 0
+    return 0.0
 endfunction
 
 //获取装饰物的z坐标
@@ -680,7 +680,7 @@ endfunction
 //返回值：装饰物的z坐标
 function GetDoodadZ takes integer index returns real
     call GetTriggeringTrigger()
-    return 0
+    return 0.0
 endfunction
 
 //设置装饰物的坐标
@@ -751,7 +751,7 @@ endfunction
 //返回值：装饰物的动画速度
 function GetDoodadSpeed takes integer index returns real
     call GetTriggeringTrigger()
-    return 0
+    return 0.0
 endfunction
 
 //获取装饰物的样式
